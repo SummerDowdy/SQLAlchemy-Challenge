@@ -1,3 +1,5 @@
+# Import the dependencies.
+
 from flask import Flask, jsonify
 
 import numpy as np
@@ -9,13 +11,15 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
-app = Flask(__name__)
-
+#################################################
+# Database Setup
+#################################################
 # connect to database
 engine = create_engine("sqlite:///hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
+
 # reflect the tables
 Base.prepare(engine, reflect=True)
 
@@ -26,17 +30,25 @@ Station = Base.classes.station
 # Create our session (link) from Python to the DB
 session = Session(engine)
 
+#################################################
+# Flask Setup
+#################################################
+app = Flask(__name__)
+
+#################################################
+# Flask Routes
+#################################################
 # Home Route
 @app.route("/")
 def home():
-        return(
-              f"<center><h1>Hawaii Climate Analysis Local API<h1></center>"
-              f"<center><h3>Select from the available routes:<h3></center>"
-              f"<center>/api/v1.0/precipitation</center>"
-              f"<center>/api/v1.0/stations</center>"
-              f"<center>/api/v1.0/tobs</center>"
-              f"<center>/api/v1.0/start/end</center>"
-        )
+    return(
+        f"<center><h1>Hawaii Climate Analysis Local API<h1></center>"
+        f"<center><h3>Select from the available routes:<h3></center>"
+        f"<center>/api/v1.0/precipitation</center>"
+        f"<center>/api/v1.0/stations</center>"
+        f"<center>/api/v1.0/tobs</center>"
+        f"<center>/api/v1.0/start/end</center>"
+    )
 
 # /api/v1.0/precipitation route
 @app.route("/api/v1.0/precipitation")
@@ -49,8 +61,10 @@ def precip():
     results = session.query(Measurement.date, Measurement.prcp).filter(Measurement.date >= PreviousYear).all()
 
     session.close()
+
     # dictionary- date=key / prcp=value
     precipitation = {date: prcp for date, prcp in results}
+    
     # convert to json
     return jsonify(precipitation)
 
@@ -90,7 +104,7 @@ def dateStats(start=None, end=None):
 
     if not end:
 
-        startDate = dt.datetime.strptime(start,"%m%d%y")
+        startDate = dt.datetime.strptime(start, "%m%d%Y")
 
         results = session.query(*selection).filter(Measurement.date >= startDate).all()
 
@@ -102,8 +116,8 @@ def dateStats(start=None, end=None):
 
     else:
         
-        startDate = dt.datetime.strptime(start, "%m%d%y")
-        endDate = dt.datetime.strptime(end, "%m%d%y")
+        startDate = dt.datetime.strptime(start, "%m%d%Y")
+        endDate = dt.datetime.strptime(end, "%m%d%Y")
 
         results = session.query(*selection).filter(Measurement.date >= startDate).filter(Measurement.date <= endDate).all()
 
@@ -114,5 +128,5 @@ def dateStats(start=None, end=None):
         return jsonify(temperatureList)
 
 # App Launcher
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
