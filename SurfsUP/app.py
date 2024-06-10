@@ -1,5 +1,4 @@
 # Import the dependencies.
-
 from flask import Flask, jsonify
 
 import numpy as np
@@ -72,6 +71,7 @@ def precip():
 @app.route("/api/v1.0/stations")
 def stations():
     results = session.query(Station.station).all()
+    
     session.close()
 
     stationList = list(np.ravel(results))
@@ -93,6 +93,7 @@ def temperatures():
     session.close()
 
     temperatureList = list(np.ravel(results))
+    
     return jsonify(temperatureList)
 
 # /api/v1.0/start/end and /api/v1.0/start routes
@@ -107,26 +108,28 @@ def dateStats(start=None, end=None):
         startDate = dt.datetime.strptime(start, "%m%d%Y")
 
         results = session.query(*selection).filter(Measurement.date >= startDate).all()
-
+        
         session.close()
-
+        
         temperatureList = list(np.ravel(results))
 
         return jsonify(temperatureList)
-
+    
     else:
         
         startDate = dt.datetime.strptime(start, "%m%d%Y")
         endDate = dt.datetime.strptime(end, "%m%d%Y")
 
-        results = session.query(*selection).filter(Measurement.date >= startDate).filter(Measurement.date <= endDate).all()
-
+        results = session.query(*selection)\
+            .filter(Measurement.date >= startDate)\
+            .filter(Measurement.date <= endDate).all()
+        
         session.close()
-
+        
         temperatureList = list(np.ravel(results))
-
+        
         return jsonify(temperatureList)
 
 # App Launcher
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
